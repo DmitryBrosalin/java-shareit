@@ -9,4 +9,10 @@ public class Item {
     private String description;
     private Boolean available;
     private long ownerId;
+
+    public Item (String name, String description, Boolean available) {
+        this.setName(name);
+        this.setDescription(description);
+        this.setAvailable(available);
+    }
 }

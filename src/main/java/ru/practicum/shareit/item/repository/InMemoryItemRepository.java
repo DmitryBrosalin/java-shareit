@@ -1,9 +1,10 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -43,10 +44,9 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     public ItemDto getItem(long id) {
-        try {
-            Optional<Item> itemOpt = Optional.of(items.get(id));
-            return ItemMapper.toItemDto(itemOpt.get());
-        } catch (NullPointerException e) {
+        if (items.containsKey(id)) {
+            return ItemMapper.toItemDto(items.get(id));
+        } else {
             throw new NotFoundException("Вещь не найдена.");
         }
     }

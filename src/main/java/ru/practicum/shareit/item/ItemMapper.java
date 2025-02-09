@@ -10,4 +10,10 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable());
     }
+
+    public static Item fromItemDto(ItemDto itemDto) {
+        return new Item(itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable());
+    }
 }
