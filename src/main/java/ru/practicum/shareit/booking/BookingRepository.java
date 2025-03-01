@@ -27,6 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b FROM Booking b JOIN FETCH b.item WHERE item.owner.id = ?1 ORDER BY b.end DESC")
     List<Booking> findByOwnerId(long ownerId);
+
     @Query("SELECT b FROM Booking b JOIN FETCH b.item WHERE item.owner.id = ?1 AND " +
             "b.start < CURRENT_TIMESTAMP AND b.end > CURRENT_TIMESTAMP AND " +
             "b.status LIKE 'APPROVED' ORDER BY b.end DESC")
