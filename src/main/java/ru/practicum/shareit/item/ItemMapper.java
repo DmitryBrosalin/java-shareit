@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.dto.BookingDtoToController;
+import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -24,8 +24,8 @@ public class ItemMapper {
         Booking lastBooking = bookingRepository.findLastBooking(item.getId());
         Booking nextBooking = bookingRepository.findNextBooking(item.getId());
         List<Comment> comments = commentRepository.findByItemIdOrderByCreatedDesc(item.getId());
-        BookingDtoToController lastBookingDto = null;
-        BookingDtoToController nextBookingDto = null;
+        BookingDtoResponse lastBookingDto = null;
+        BookingDtoResponse nextBookingDto = null;
         List<CommentDto> commentsDto = null;
         if (lastBooking != null) {
             lastBookingDto = BookingMapper.toBookingDto(lastBooking);

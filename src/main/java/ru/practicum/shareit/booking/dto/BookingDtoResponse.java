@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class BookingDtoToController {
+public class BookingDtoResponse {
     private long id;
     private Item item;
     private User booker;

@@ -30,18 +30,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b FROM Booking b JOIN FETCH b.item WHERE item.owner.id = ?1 AND " +
             "b.start < CURRENT_TIMESTAMP AND b.end > CURRENT_TIMESTAMP AND " +
-            "b.status LIKE 'APPROVED' ORDER BY b.end DESC")
-    List<Booking> findByOwnerIdCurrent(long ownerId);
+            "b.status LIKE ?2 ORDER BY b.end DESC")
+    List<Booking> findByOwnerIdCurrent(long ownerId, BookingState status);
 
     @Query("SELECT b FROM Booking b JOIN FETCH b.item WHERE item.owner.id = ?1 AND " +
             "b.end < CURRENT_TIMESTAMP AND " +
-            "b.status LIKE 'APPROVED' ORDER BY b.end DESC")
-    List<Booking> findByOwnerIdPast(long ownerId);
+            "b.status LIKE ?2 ORDER BY b.end DESC")
+    List<Booking> findByOwnerIdPast(long ownerId, BookingState status);
 
     @Query("SELECT b FROM Booking b JOIN FETCH b.item WHERE item.owner.id = ?1 AND " +
             "b.start > CURRENT_TIMESTAMP AND " +
-            "b.status LIKE 'APPROVED' ORDER BY b.end DESC")
-    List<Booking> findByOwnerIdFuture(long ownerId);
+            "b.status LIKE ?2 ORDER BY b.end DESC")
+    List<Booking> findByOwnerIdFuture(long ownerId, BookingState status);
 
     @Query("SELECT b FROM Booking b JOIN FETCH b.item WHERE item.owner.id = ?1 AND " +
             "b.status LIKE ?2 ORDER BY b.end DESC")

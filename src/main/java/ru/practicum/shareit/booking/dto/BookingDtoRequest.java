@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Data
-public class BookingDtoFromController {
+public class BookingDtoRequest {
     private long itemId;
     private LocalDateTime start;
     private LocalDateTime end;

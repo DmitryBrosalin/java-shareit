@@ -2,8 +2,8 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingDtoFromController;
-import ru.practicum.shareit.booking.dto.BookingDtoToController;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
+import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.exception.BadRequestException;
@@ -22,7 +22,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public BookingDtoToController addBooking(BookingDtoFromController bookingDto, long userId) {
+    public BookingDtoResponse addBooking(BookingDtoRequest bookingDto, long userId) {
         validateBooking(bookingDto, userId);
         Booking booking = BookingMapper.fromBookingDto(bookingDto, itemRepository.findById(bookingDto.getItemId()));
         if (booking.getItem().getAvailable()) {
@@ -35,7 +35,7 @@ public class BookingService {
         }
     }
 
-    public BookingDtoToController approveBooking(long bookingId, long ownerId, boolean isApproved) {
+    public BookingDtoResponse approveBooking(long bookingId, long ownerId, boolean isApproved) {
         Booking booking = bookingRepository.findById(bookingId);
         if (booking.getItem().getOwner().getId() != ownerId) {
             throw new BadRequestException("Подтверждать или отклонять запрос на бронирование может только владелец вещи.");
@@ -49,7 +49,7 @@ public class BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
-    public BookingDtoToController getBooking(long bookingId, long userId) {
+    public BookingDtoResponse getBooking(long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId);
         if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
             throw new BadRequestException("Просматривать бронирование может только владелец вещи или автор бронирования.");
@@ -57,7 +57,7 @@ public class BookingService {
         return BookingMapper.toBookingDto(booking);
     }
 
-    public List<BookingDtoToController> getBookingsForUser(long userId, String state) {
+    public List<BookingDtoResponse> getBookingsForUser(long userId, String state) {
         if (userRepository.findById(userId) == null) {
             throw new NotFoundException("Пользователь не найден.");
         }
@@ -82,32 +82,30 @@ public class BookingService {
         };
     }
 
-    public List<BookingDtoToController> getBookingsForOwner(long ownerId, String state) {
+    public List<BookingDtoResponse> getBookingsForOwner(long ownerId, String state) {
         if (userRepository.findById(ownerId) == null) {
             throw new NotFoundException("Пользователь не найден.");
         }
-        state = state.toUpperCase();
-        return switch (state) {
-            case ("ALL") -> bookingRepository.findByOwnerId(ownerId)
+        BookingState bookingState = BookingState.valueOf(state.toUpperCase());
+        return switch (bookingState) {
+            case BookingState.ALL -> bookingRepository.findByOwnerId(ownerId)
                     .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
-            case ("CURRENT") ->
-                    bookingRepository.findByOwnerIdCurrent(ownerId)
+            case BookingState.CURRENT ->
+                    bookingRepository.findByOwnerIdCurrent(ownerId, BookingState.APPROVED)
                             .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
-            case ("PAST") ->
-                    bookingRepository.findByOwnerIdPast(ownerId)
+            case BookingState.PAST ->
+                    bookingRepository.findByOwnerIdPast(ownerId, BookingState.APPROVED)
                             .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
-            case ("FUTURE") ->
-                    bookingRepository.findByOwnerIdFuture(ownerId)
+            case BookingState.FUTURE ->
+                    bookingRepository.findByOwnerIdFuture(ownerId, BookingState.APPROVED)
                             .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
-            case ("WAITING") -> bookingRepository.findByOwnerIdAndStatus(ownerId, BookingState.WAITING)
-                    .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
-            case ("REJECTED") -> bookingRepository.findByOwnerIdAndStatus(ownerId, BookingState.REJECTED)
+            case BookingState.WAITING, BookingState.REJECTED -> bookingRepository.findByOwnerIdAndStatus(ownerId, bookingState)
                     .stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
             default -> throw new BadRequestException("Неизвестное состояние бронирования.");
         };
     }
 
-    private void validateBooking(BookingDtoFromController bookingDto, long userId) {
+    private void validateBooking(BookingDtoRequest bookingDto, long userId) {
         if (userRepository.findById(userId) == null) {
             throw new NotFoundException("Пользователь не найден.");
         }

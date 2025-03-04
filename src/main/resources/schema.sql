@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS bookings (
     status VARCHAR(20) NOT NULL,
     booking_start TIMESTAMP NOT NULL,
     booking_end TIMESTAMP NOT NULL,
-    CONSTRAINT pk_booking PRIMARY KEY (id)
+    CONSTRAINT pk_booking PRIMARY KEY (id),
+    FOREIGN KEY (booker_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -31,5 +33,6 @@ CREATE TABLE IF NOT EXISTS comments (
     author_name VARCHAR(255) NOT NULL,
     text VARCHAR(255) NOT NULL,
     created TIMESTAMP NOT NULL,
-    CONSTRAINT pk_comment PRIMARY KEY (id)
+    CONSTRAINT pk_comment PRIMARY KEY (id),
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
