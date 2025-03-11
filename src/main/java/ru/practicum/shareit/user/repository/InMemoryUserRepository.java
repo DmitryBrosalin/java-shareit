@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
-public class InMemoryUserRepository implements UserRepository {
+public class InMemoryUserRepository {
     private final Map<Long, User> users;
 
     public UserDto addUser(User user) {
