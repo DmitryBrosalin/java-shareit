@@ -31,23 +31,14 @@ public class ItemService {
 
     public ItemDto addItem(long userId, ItemDto itemDto) {
         Item item = itemMapper.fromItemDto(itemDto);
-        if (userRepository.findById(userId) != null) {
-            item.setOwner(userRepository.findById(userId));
-            if (item.getName() == null || item.getName().isBlank() ||
-                    item.getDescription() == null || item.getDescription().isBlank() ||
-                    item.getAvailable() == null) {
-                throw new BadRequestException("Поля вещи не могут быть пустыми.");
-            }
-            return itemMapper.toItemDto(itemRepository.save(item));
-        } else {
-            throw new NotFoundException("Пользователь не найден.");
-        }
+        validateUser(userId);
+        item.setOwner(userRepository.findById(userId));
+        return itemMapper.toItemDto(itemRepository.save(item));
     }
 
     public ItemDto updateItem(long userId, long id, ItemDto itemDto) {
-        if (userRepository.findById(userId) == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
+        validateUser(userId);
+        validateItem(id);
         Item item = itemMapper.fromItemDto(itemDto);
         Item oldItem = itemRepository.findById(id);
         if (oldItem.getOwner().getId() != userId) {
@@ -67,9 +58,7 @@ public class ItemService {
 
     public ItemDto getItem(long id, long userId) {
         Item item = itemRepository.findById(id);
-        if (itemRepository.findById(id) == null) {
-            throw new NotFoundException("Вещь не найдена.");
-        }
+        validateItem(id);
         ItemDto itemDto = itemMapper.toItemDto(item);
         if (userId != item.getOwner().getId()) {
             itemDto.setLastBooking(null);
@@ -79,7 +68,7 @@ public class ItemService {
     }
 
     public List<ItemDto> getItemsForOwner(long userId) {
-        userRepository.findById(userId);
+        validateUser(userId);
         return itemRepository.findByOwnerId(userId).stream().map(itemMapper::toItemDto).collect(Collectors.toList());
     }
 
@@ -93,6 +82,8 @@ public class ItemService {
     }
 
     public CommentDto addComment(long userId, long id, CommentDto commentDto) {
+        validateUser(userId);
+        validateItem(id);
         List<Booking> b = bookingRepository.findByBookerIdAndStatusAndEndBeforeOrderByEndDesc(userId, BookingState.APPROVED,
                 LocalDateTime.now());
         if (b == null || b.stream().noneMatch(booking -> booking.getItem().getId() == id)) {
@@ -103,5 +94,17 @@ public class ItemService {
         comment.setAuthorName(userRepository.findById(userId).getName());
         comment.setCreated(LocalDateTime.now());
         return CommentMapper.toCommentDto(commentRepository.save(comment));
+    }
+
+    private void validateUser(long userId) {
+        if (userRepository.findById(userId) == null) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+    }
+
+    private void validateItem(long itemId) {
+        if (itemRepository.findById(itemId) == null) {
+            throw new NotFoundException("Вещь не найдена.");
+        }
     }
 }

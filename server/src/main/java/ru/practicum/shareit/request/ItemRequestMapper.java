@@ -1,23 +1,31 @@
 package ru.practicum.shareit.request;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
+@Component
 public class ItemRequestMapper {
+    private final ItemRepository itemRepository;
+
     public static ItemRequest fromItemRequestDto(ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setDescription(itemRequestDto.getDescription());
         return itemRequest;
     }
 
-    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
+    public ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setId(itemRequest.getId());
         itemRequestDto.setDescription(itemRequest.getDescription());
         itemRequestDto.setCreated(itemRequest.getCreated());
-        itemRequestDto.setItems(itemRequest.getItems().stream().map(ItemMapper::toItemForRequestListDto).collect(Collectors.toList()));
+        itemRequestDto.setItems(itemRepository.findByItemRequestId(itemRequest.getId())
+                .stream().map(ItemMapper::toItemForRequestListDto).collect(Collectors.toList()));
         return itemRequestDto;
     }
 }

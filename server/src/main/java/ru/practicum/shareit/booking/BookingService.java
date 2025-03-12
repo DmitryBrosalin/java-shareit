@@ -112,14 +112,5 @@ public class BookingService {
         if (itemRepository.findById(bookingDto.getItemId()) == null) {
             throw new NotFoundException("Вещь не найдена.");
         }
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
-            throw new BadRequestException("Ошибка при вводе времени бронирования.");
-        }
-        if (bookingDto.getStart().isBefore(LocalDateTime.now()) || bookingDto.getEnd().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Бронирование не может быть в прошлом");
-        }
-        if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
-            throw new BadRequestException("Бронирование должно иметь длительность");
-        }
     }
 }

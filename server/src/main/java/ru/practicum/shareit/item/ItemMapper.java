@@ -28,9 +28,14 @@ public class ItemMapper {
         Booking lastBooking = bookingRepository.findLastBooking(item.getId());
         Booking nextBooking = bookingRepository.findNextBooking(item.getId());
         List<Comment> comments = commentRepository.findByItemIdOrderByCreatedDesc(item.getId());
+        ItemRequest itemRequest = item.getItemRequest();
         BookingDtoResponse lastBookingDto = null;
         BookingDtoResponse nextBookingDto = null;
         List<CommentDto> commentsDto = null;
+        long itemRequestId = 0;
+        if (itemRequest != null) {
+            itemRequestId = itemRequest.getId();
+        }
         if (lastBooking != null) {
             lastBookingDto = BookingMapper.toBookingDto(lastBooking);
         }
@@ -47,7 +52,7 @@ public class ItemMapper {
                 lastBookingDto,
                 nextBookingDto,
                 commentsDto,
-                item.getItemRequest().getId());
+                itemRequestId);
     }
 
     public Item fromItemDto(ItemDto itemDto) {

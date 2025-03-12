@@ -14,25 +14,33 @@ import java.util.List;
 public class ItemRequestService {
     private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
+    private final ItemRequestMapper itemRequestMapper;
 
     public ItemRequestDto addRequest(ItemRequestDto itemRequestDto, long userId) {
-        if (userRepository.findById(userId) == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
+        validateUser(userId);
         ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
-        return ItemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest));
+        itemRequest.setUser(userRepository.findById(userId));
+        return itemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest));
     }
 
     public List<ItemRequestDto> getItemRequestsForUser(long userId) {
-        return null;
+        validateUser(userId);
+        return itemRequestRepository.findByUserId(userId).stream().map(itemRequestMapper::toItemRequestDto).toList();
     }
 
     public List<ItemRequestDto> getAllItemRequests(long userId) {
-        return null;
+        validateUser(userId);
+        return itemRequestRepository.findByUserIdNot(userId).stream().map(itemRequestMapper::toItemRequestDto).toList();
     }
 
     public ItemRequestDto getItemRequest(long id) {
-        return null;
+        return itemRequestMapper.toItemRequestDto(itemRequestRepository.findById(id));
+    }
+
+    private void validateUser(long userId) {
+        if (userRepository.findById(userId) == null) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
     }
 }

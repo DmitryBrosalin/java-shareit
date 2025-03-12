@@ -11,6 +11,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exception.BadRequestException;
+
+import java.util.List;
 
 
 @Controller
@@ -35,6 +38,9 @@ public class BookingController {
 	@PostMapping
 	public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
 			@RequestBody @Valid BookItemRequestDto requestDto) {
+		if (requestDto.getStart().isEqual(requestDto.getEnd()) || requestDto.getStart().isAfter(requestDto.getEnd())) {
+			throw new BadRequestException("Бронирование должно иметь длительность");
+		}
 		log.info("Creating booking {}, userId={}", requestDto, userId);
 		return bookingClient.bookItem(userId, requestDto);
 	}
@@ -44,5 +50,22 @@ public class BookingController {
 			@PathVariable Long bookingId) {
 		log.info("Get booking {}, userId={}", bookingId, userId);
 		return bookingClient.getBooking(userId, bookingId);
+	}
+
+	@PatchMapping(value = "/{bookingId}")
+	public ResponseEntity<Object> approveBooking(@PathVariable long bookingId,
+											 @RequestHeader("X-Sharer-User-Id") long ownerId,
+											 @RequestParam boolean approved) {
+		log.info("Patch booking {}, ownerId {} approved {}", bookingId, ownerId, approved);
+		return bookingClient.approveBooking(bookingId, ownerId, approved);
+	}
+
+	@GetMapping(value = "/owner")
+	public ResponseEntity<Object> getBookingsForOwner(@RequestHeader("X-Sharer-User-Id") long ownerId,
+													  @RequestParam(required = false, defaultValue = "ALL") String state) {
+		BookingState bookingState = BookingState.from(state)
+				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + state));
+		log.info("Get bookings for owner {} with state {}", ownerId, state);
+		return bookingClient.getBookingsForOwner(ownerId, bookingState);
 	}
 }
