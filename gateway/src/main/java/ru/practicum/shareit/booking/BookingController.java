@@ -13,9 +13,6 @@ import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.exception.BadRequestException;
 
-import java.util.List;
-
-
 @Controller
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
