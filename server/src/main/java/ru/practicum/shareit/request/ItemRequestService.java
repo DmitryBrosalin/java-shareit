@@ -18,7 +18,7 @@ public class ItemRequestService {
 
     public ItemRequestDto addRequest(ItemRequestDto itemRequestDto, long userId) {
         validateUser(userId);
-        ItemRequest itemRequest = ItemRequestMapper.fromItemRequestDto(itemRequestDto);
+        ItemRequest itemRequest = itemRequestMapper.fromItemRequestDto(itemRequestDto);
         itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setUser(userRepository.findById(userId));
         return itemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest));

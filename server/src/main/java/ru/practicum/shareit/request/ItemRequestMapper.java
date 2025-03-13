@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 @Component
 public class ItemRequestMapper {
     private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
 
-    public static ItemRequest fromItemRequestDto(ItemRequestDto itemRequestDto) {
+    public ItemRequest fromItemRequestDto(ItemRequestDto itemRequestDto) {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setDescription(itemRequestDto.getDescription());
         return itemRequest;
@@ -25,7 +26,7 @@ public class ItemRequestMapper {
         itemRequestDto.setDescription(itemRequest.getDescription());
         itemRequestDto.setCreated(itemRequest.getCreated());
         itemRequestDto.setItems(itemRepository.findByItemRequestId(itemRequest.getId())
-                .stream().map(ItemMapper::toItemForRequestListDto).collect(Collectors.toList()));
+                .stream().map(itemMapper::toItemForRequestListDto).collect(Collectors.toList()));
         return itemRequestDto;
     }
 }

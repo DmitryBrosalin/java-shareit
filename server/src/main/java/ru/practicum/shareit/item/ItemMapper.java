@@ -65,7 +65,7 @@ public class ItemMapper {
         return item;
     }
 
-    public static ItemForRequestListDto toItemForRequestListDto(Item item) {
+    public ItemForRequestListDto toItemForRequestListDto(Item item) {
         return new ItemForRequestListDto(item.getId(), item.getName(), item.getOwner().getId());
     }
 }
